@@ -1,0 +1,19 @@
+.landing{
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.canvas{
+    position: absolute;
+    inset: 0;
+}
+
+.intro{
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    background: white;
+    padding: 40px;
+}
