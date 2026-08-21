@@ -1,6 +1,7 @@
 import "./algorithmCanvas.css"
 import { useEffect, useRef } from "react"
 import type { HexNode } from "../../types/graph";
+import { bfs } from "../../algorithms/bfs";
 
 function createHexGrid(
     width:number,
@@ -209,6 +210,25 @@ function AlgorithmCanvas (){
 
         const nodes = createHexGrid(canvas.width, canvas.height, radius);
         connectNeighbors(nodes);
+
+        const startId = 10;
+        const goalId = 100;
+
+        const result = bfs(
+            nodes,
+            startId,
+            goalId
+        );
+
+        console.log(
+            "Visited:",
+            result.visitedOrder
+        );
+
+        console.log(
+            "Path:",
+            result.path
+        );
 
         console.log(nodes[50]);
 
