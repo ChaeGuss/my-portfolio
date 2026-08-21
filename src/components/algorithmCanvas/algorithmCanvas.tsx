@@ -1,39 +1,37 @@
 import "./algorithmCanvas.css"
 import { useEffect, useRef } from "react"
+import type { HexNode } from "../../types/graph";
 
 function createHexGrid(
     width:number,
     height:number,
     radius:number
-){
+): HexNode[] {
 
-    const nodes = [];
+    const nodes: HexNode[] = [];
 
-    const hexHeight = Math.sqrt(3) * radius;
     const horizontalSpacing = radius * 1.5;
+    const verticalSpacing = Math.sqrt(3) * radius;
+
+    const columns = Math.ceil(width / horizontalSpacing);
+    const rows = Math.ceil(height / verticalSpacing);
 
 
     let id = 0;
 
 
-    for(
-        let row = 0;
-        row * hexHeight < height + hexHeight;
-        row++
-    ){
+    for(let col = 0; col < columns; col++){
 
-        for(
-            let col = 0;
-            col * horizontalSpacing < width + radius;
-            col++
-        ){
+        for(let row = 0; row < rows; row++){
 
-            let offset = 0;
+            const x = col * horizontalSpacing;
+
+            let y = row * verticalSpacing;
 
 
-            if(row % 2 === 1){
+            if(col % 2 === 1){
 
-                offset = radius * 0.75;
+                y += verticalSpacing / 2
 
             }
 
@@ -41,12 +39,14 @@ function createHexGrid(
             nodes.push({
 
                 id:id,
+                row:row,
+                col:col,
 
-                x:
-                col * horizontalSpacing + offset,
+                x:x,
 
-                y:
-                row * hexHeight
+                y:y,
+
+                neighbors: []
 
             });
 
@@ -59,6 +59,75 @@ function createHexGrid(
 
 
     return nodes;
+
+}
+
+function connectNeighbors(nodes: HexNode[]) {
+
+    const nodeMap = new Map<string, HexNode>();
+
+    nodes.forEach((node) => {
+        nodeMap.set(
+            `${node.row},${node.col}`,
+            node
+        );
+    });
+
+
+    nodes.forEach((node) => {
+
+        const evenColumnDirections = [
+            [-1, 0],
+            [1, 0],
+            [-1, -1],
+            [0, -1],
+            [-1, 1],
+            [0, 1]
+        ];
+
+
+        const oddColumnDirections = [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [1, -1],
+            [0, 1],
+            [1, 1]
+        ];
+
+
+        const directions =
+            node.col % 2 === 0
+                ? evenColumnDirections
+                : oddColumnDirections;
+
+
+        directions.forEach(([rowOffset, colOffset]) => {
+
+            const neighborRow =
+                node.row + rowOffset;
+
+            const neighborCol =
+                node.col + colOffset;
+
+
+            const neighbor =
+                nodeMap.get(
+                    `${neighborRow},${neighborCol}`
+                );
+
+
+            if (neighbor) {
+
+                node.neighbors.push(
+                    neighbor.id
+                );
+
+            }
+
+        });
+
+    });
 
 }
 
@@ -85,6 +154,23 @@ function drawHexagon(
 
     context.closePath();
     context.stroke();
+}
+
+function drawNodeId(context: CanvasRenderingContext2D, node: HexNode){
+    context.fillStyle = "white";
+
+    context.font = "10px Arial";
+
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+
+    context.fillText(
+        node.id.toString(),
+        node.x,
+        node.y
+    );
+
+    
 }
 
 function AlgorithmCanvas (){
@@ -119,10 +205,17 @@ function AlgorithmCanvas (){
 
         context.strokeStyle = "white";
 
-        const nodes = createHexGrid(canvas.width, canvas.height, 30);
+        const radius = 30;
+
+        const nodes = createHexGrid(canvas.width, canvas.height, radius);
+        connectNeighbors(nodes);
+
+        console.log(nodes[50]);
 
         nodes.forEach((node)=>{
-            drawHexagon(context, node.x, node.y, 30);
+            drawHexagon(context, node.x, node.y, radius);
+
+            drawNodeId(context, node);
         })
 
 
