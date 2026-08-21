@@ -119,12 +119,11 @@ function AlgorithmCanvas (){
 
         context.strokeStyle = "white";
 
-        drawHexagon(
-            context,
-            300,
-            300,
-            50
-        );
+        const nodes = createHexGrid(canvas.width, canvas.height, 30);
+
+        nodes.forEach((node)=>{
+            drawHexagon(context, node.x, node.y, 30);
+        })
 
 
     }, []);
